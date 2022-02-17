@@ -1,5 +1,3 @@
 # Technical-Test
 
-To run:
-  make all
-  ./main
+To run: make all then ./main
