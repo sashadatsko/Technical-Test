@@ -1,3 +1,3 @@
 # Technical-Test
 
-To run: make all then ./main
+To run: make all, ./main "fileToFind"
