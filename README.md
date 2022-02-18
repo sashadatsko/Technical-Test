@@ -1,10 +1,7 @@
 # Technical-Test
 
-To run: make all 
+To run:
 
-
-
-
-
+make all 
 
 ./main "fileToFind"
