@@ -4,4 +4,4 @@ To run:
 
 make all 
 
-./main "fileToFind"
+./main "filename"
