@@ -3,39 +3,38 @@
 namespace fs = std::filesystem;
 
 std::vector<std::string> rootDirs;
-std::condition_variable cv;
-std::mutex m;
 
-void iterate(const char* path, const char* fileName, std::atomic<bool> & workdone, std::condition_variable & cv, std::mutex & m)
+// std::condition_variable cv;
+// std::mutex m;
+
+
+void iterate(char* path, char* fileName/*, std::atomic<bool> & workdone, std::condition_variable & cv, std::mutex & m*/)
 {
-    if(!workdone.load()){
+    // std::unique_lock<std::mutex> lk(m);
 
-        std::unique_lock<std::mutex> lk(m);
-
-        for (const auto& entry : fs::recursive_directory_iterator(path, fs::directory_options::skip_permission_denied))
+    for (const auto& entry : fs::recursive_directory_iterator(path, fs::directory_options::skip_permission_denied))
+    {
+        try
         {
-            try
+            if(fs::exists(entry))
             {
-                if(fs::exists(entry))
+                if(entry.path().filename() == fileName)
                 {
-                    if(entry.path().filename() == fileName)
-                    {
-                        printf("\nFILE: %s found\n", fileName);
-                        std::cout << "PATH TO FILE: " << entry.path() << "\n\n";
-                        std::notify_all_at_thread_exit(std::ref(cv), std::move(lk));
-                    }
+                    printf("\nFILE: %s found\n", fileName);
+                    std::cout << "PATH TO FILE: " << entry.path() << "\n\n";
+                    // std::notify_all_at_thread_exit(std::ref(cv), std::move(lk));
                 }
-
-            }catch(fs::__cxx11::filesystem_error &e)
-            {
-                //ignore
             }
-                
+
+        }catch(fs::__cxx11::filesystem_error &e)
+        {
+            //ignore
         }
+
     }
 }
 
-int goFind(const char* filename)
+int goFind(char* filename)
 {
     fs::path rootPath = fs::current_path();
 
@@ -55,26 +54,7 @@ int goFind(const char* filename)
 
     unsigned i = 0;
 
-    // while(i < rootDirs.size())
-    // {
-    //     for(int j = 0; j < 8; j++, i++)
-    //     {
-    //         if(i == rootDirs.size())
-    //         {
-    //             std::cout << "\nFILE NOT FOUND\n" << std::endl;
-    //             workdone = 1;
-    //             break;
-    //         }
-
-    //         threads.push_back(std::thread(iterate, &rootDirs[i][0], filename, std::ref(workdone), std::ref(cv), std::ref(m)));
-    //         threads.back().join();
-    //     }
-
-    //     if(workdone)
-    //         break;
-
-    //     i++;
-    // }
+    bool endOfDirs = false;
 
     while(i < rootDirs.size())
     {
@@ -83,21 +63,45 @@ int goFind(const char* filename)
             if(i == rootDirs.size())
             {
                 std::cout << "\nFILE NOT FOUND\n" << std::endl;
+                endOfDirs = 1;
                 break;
             }
 
-            threads.push_back(std::thread(iterate, &rootDirs[i][0], filename, std::ref(workdone), std::ref(cv), std::ref(m)));
+            threads.push_back(std::thread(iterate, &rootDirs[i][0], filename/*, std::ref(workdone), std::ref(cv), std::ref(m)*/));
+            threads.back().join();
         }
-        
+
+        if(endOfDirs)
+            break;
 
         i++;
     }
 
 
-    for(auto &thNum : threads)
-    {
-        thNum.join();
-    }
+    // int workingThreads = 0;
+    // while(i < rootDirs.size())
+    // {
+    //     for(; workingThreads < 8; workingThreads++, i++)
+    //     {
+    //         if(i == rootDirs.size())
+    //         {
+    //             std::cout << "\nFILE NOT FOUND\n\n";
+    //             break;
+    //         }
+
+    //         threads.push_back(std::thread(iterate, &rootDirs[i][0], filename/*, std::ref(workdone), std::ref(cv), std::ref(m)*/));
+    //     }
+    
+
+    //     for(int j = 0; j < workingThreads; j++)
+    //     {
+    //         threads[j].join();
+    //     }
+
+    //     workingThreads = 0;
+
+    //     i++;
+    // }
 
     return 0;
 }

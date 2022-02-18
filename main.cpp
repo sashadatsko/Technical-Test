@@ -1,8 +1,13 @@
 #include "FindFile.hpp"
 
-int main()
+int main(int argc, char *argv[])
 {
-    goFind("file.f");
+    
+    if(argc == 2)
+        goFind(argv[1]);
+    else
+        std::cout << "no input\n";
+
 
     return 0;
 }
