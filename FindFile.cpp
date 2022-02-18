@@ -20,7 +20,7 @@ void iterate(char* path, char* fileName/*, std::atomic<bool> & workdone, std::co
             {
                 if(entry.path().filename() == fileName)
                 {
-                    printf("\nFILE: %s found\n", fileName);
+                    std::cout << fileName << " found\n";
                     std::cout << "PATH TO FILE: " << entry.path() << "\n\n";
                     // std::notify_all_at_thread_exit(std::ref(cv), std::move(lk));
                 }
